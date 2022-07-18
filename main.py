@@ -4,12 +4,19 @@ from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import matplotlib.pyplot as plt
 
-def costruisci_toro(r, R, r_density, theta_density):
-    x, y = symbols("x y")
-    f = sqrt(r**2-(sqrt(x**2+y**2)-R)**2)
+
+fig = plt.figure()
+ax = Axes3D(fig, auto_add_to_figure=False)
+ax.set_xlim3d(-40, 40)
+ax.set_ylim3d(-40, 40)
+ax.set_zlim3d(-20, 20)
+fig.add_axes(ax)
+
+
+def costruisci_toro(r, R, r_density, theta_density, f, starting_color):
+
     # r è il raggio della circonferenza che ruota attorno all'asse z
     # R è il raggio della circonferenza che passa per tutti i centri delle circonferenze di raggio r
-
 
     xyz = np.zeros((r_density, theta_density, 3)) # array dei punti del toro
 
@@ -22,18 +29,15 @@ def costruisci_toro(r, R, r_density, theta_density):
             xp = float(r_temp * cos(theta_temp))
             yp = float(r_temp * sin(theta_temp))
             zp = f.subs([(x, xp), (y, yp)])
-            if (not zp.is_real) or zp < 10**(-4): #Messo per bilanciare l'appossimazione
+            if (not zp.is_real) or abs(zp) < 10**(-4): #Messo per bilanciare l'appossimazione
                 zp = 0
 
             xyz[i][j] = [xp, yp, zp] # Poi li sbatto dentro l'array
 
-
-
-
     numero_sottomatrici = (theta_density-1)*(r_density- 1)
     sottomatrici = np.zeros((numero_sottomatrici, 4, 3))
 
-    i=0
+    i = 0
     for n in range(r_density - 1):
         for m in range(theta_density - 1):
             sottomatrici[i] = [
@@ -42,14 +46,8 @@ def costruisci_toro(r, R, r_density, theta_density):
             ]
             i += 1
 
-    fig = plt.figure()
-    ax = Axes3D(fig, auto_add_to_figure=False)
-    ax.set_xlim3d(-40, 40)
-    ax.set_ylim3d(-40, 40)
-    ax.set_zlim3d(0, 40)
-    fig.add_axes(ax)
 
-    color = 'w'
+    color = starting_color
     for p in sottomatrici:
         if color == 'w':
             color = 'k'
@@ -66,10 +64,12 @@ def costruisci_toro(r, R, r_density, theta_density):
 
 
 
-
-
-    plt.show()
-
-
 if __name__ == '__main__':
-    costruisci_toro(10, 30, 20, 20)
+    r = 10
+    R = 30
+    x, y = symbols("x y")
+    f = sqrt(r ** 2 - (sqrt(x ** 2 + y ** 2) - R) ** 2)
+    g = -sqrt(r ** 2 - (sqrt(x ** 2 + y ** 2) - R) ** 2)
+    costruisci_toro(r, R, 20, 20, f, 'w')
+    costruisci_toro(r, R, 20, 20, g, 'k')
+    plt.show()
