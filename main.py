@@ -29,20 +29,22 @@ def costruisci_toro(r, R, r_density, theta_density):
             xp = float(r_temp * cos(theta_temp))
             yp = float(r_temp * sin(theta_temp))
             zp = f.subs([(x, xp), (y, yp)])
-            if not zp.is_real: #Messo per bilanciare l'appossimazione
+            if (not zp.is_real) or zp < 10**(-4): #Messo per bilanciare l'appossimazione
                 zp = 0
 
             xyz.append([xp, yp, zp]) # Poi li sbatto dentro l'array
 
-    # print(xyz)
+    print(xyz)
 
     xyz_interno = []
     xyz_esterno = []
     for p in xyz:
-        if p[0]**2 + p[1]**2 <= R**2:
+        if p[0]**2 + p[1]**2 < R**2:
             xyz_interno.append(p)
-        else:
+        elif p[0]**2 + p[1]**2 > R**2:
             xyz_esterno.append(p)
+        else:
+            xyz_interno.append(p)
 
     xyz_interno = sorted(xyz_interno, key=lambda tup: tup[2])
     matrice_p_interni = np.zeros((int(len(xyz_interno)/theta_density), theta_density, 3))
@@ -67,7 +69,6 @@ def costruisci_toro(r, R, r_density, theta_density):
     j = 0
 
     for p in xyz_esterno:
-        print(p)
         if xyz_esterno.index(p) == 0:
             matrice_p_esterni[0][0] = p
             j += 1
@@ -96,12 +97,21 @@ def costruisci_toro(r, R, r_density, theta_density):
                 matrice_p_interni[n+1][m], matrice_p_interni[n+1][m+1]
         ]
             i+=1
-    # print(sottomatrici_interni)
 
 
-    # step = pi/6
-    # for p in xyz:
-    #    xyz[xyz.index(p)] = ((p[0]*compute_cos(step), p[1], p[2]*compute_sin(step)))
+    sottomatrici_esterni = np.zeros(((int(len(xyz_esterno) / theta_density) - 1) * (theta_density - 1), 4, 3))
+    i = 0
+    for n in range(
+            (int(len(xyz_esterno) / theta_density) - 1)
+    ):
+        for m in range(theta_density - 1):
+            sottomatrici_esterni[i] = [
+                matrice_p_esterni[n][m], matrice_p_esterni[n][m + 1],
+                matrice_p_esterni[n + 1][m], matrice_p_esterni[n + 1][m + 1]
+            ]
+            i += 1
+
+
 
     fig = plt.figure()
     ax = Axes3D(fig, auto_add_to_figure=False)
@@ -130,25 +140,6 @@ def costruisci_toro(r, R, r_density, theta_density):
     #ax.add_collection3d(Poly3DCollection(verts))
 
 
-    # print(matrice_p_interni)
-
-    sottomatrici_esterni = np.zeros(((int(len(xyz_esterno) / theta_density) - 1) * (theta_density - 1), 4, 3))
-    i = 0
-    for n in range(
-            (int(len(xyz_esterno) / theta_density) - 1)
-    ):
-        for m in range(theta_density - 1):
-            sottomatrici_esterni[i] = [
-                matrice_p_esterni[n][m], matrice_p_esterni[n][m + 1],
-                matrice_p_esterni[n + 1][m], matrice_p_esterni[n + 1][m + 1]
-            ]
-            i += 1
-    # print(sottomatrici_interni)
-
-    # step = pi/6
-    # for p in xyz:
-    #    xyz[xyz.index(p)] = ((p[0]*compute_cos(step), p[1], p[2]*compute_sin(step)))
-
     color = 'w'
 
     for p in sottomatrici_esterni:
@@ -175,5 +166,10 @@ def costruisci_toro(r, R, r_density, theta_density):
     plt.show()
 
 
+    # step = pi/6
+    # for p in xyz:
+    #    xyz[xyz.index(p)] = ((p[0]*compute_cos(step), p[1], p[2]*compute_sin(step)))
+
+
 if __name__ == '__main__':
-    costruisci_toro(10, 30, 10, 20)
+    costruisci_toro(10, 30, 20, 20)
