@@ -18,6 +18,7 @@ def costruisci_toro(r, R, r_density, theta_density):
     # r è il raggio della circonferenza che ruota attorno all'asse z
     # R è il raggio della circonferenza che passa per tutti i centri delle circonferenze di raggio r
 
+
     xyz = [] # array dei punti del toro
 
     for i in range(r_density):
@@ -33,9 +34,11 @@ def costruisci_toro(r, R, r_density, theta_density):
                 zp = 0
 
             xyz.append([xp, yp, zp]) # Poi li sbatto dentro l'array
+            
+    
+
 
     print(xyz)
-
     xyz_interno = []
     xyz_esterno = []
     for p in xyz:
@@ -46,7 +49,7 @@ def costruisci_toro(r, R, r_density, theta_density):
         else:
             xyz_interno.append(p)
 
-    xyz_interno = sorted(xyz_interno, key=lambda tup: tup[2])
+    
     matrice_p_interni = np.zeros((int(len(xyz_interno)/theta_density), theta_density, 3))
     matrice_p_esterni = np.zeros((int(len(xyz_esterno) / theta_density), theta_density, 3))
 
@@ -81,14 +84,12 @@ def costruisci_toro(r, R, r_density, theta_density):
             matrice_p_esterni[i][0] = p
             j = 1
 
-
-
     # print(matrice_p_interni)
 
     sottomatrici_interni = np.zeros(((int(len(xyz_interno)/theta_density)-1)*(theta_density-1),4,3))
     i = 0
     for n in range(
-            (int(len(xyz_interno)/theta_density)-1)
+            int(len(xyz_interno)/theta_density)-1
     ):
         for m in range(theta_density-1):
 
@@ -96,8 +97,8 @@ def costruisci_toro(r, R, r_density, theta_density):
                 matrice_p_interni[n][m], matrice_p_interni[n][m+1],
                 matrice_p_interni[n+1][m], matrice_p_interni[n+1][m+1]
         ]
+            print(sottomatrici_interni[i])
             i+=1
-
 
     sottomatrici_esterni = np.zeros(((int(len(xyz_esterno) / theta_density) - 1) * (theta_density - 1), 4, 3))
     i = 0
